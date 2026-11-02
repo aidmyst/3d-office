@@ -61,83 +61,102 @@ addBox(scene, mats.wall, [0, 1.75, -6.85], [18, 3.5, 0.3]);
 addBox(scene, mats.trim, [0, 0.04, -6.65], [17.5, 0.12, 0.08]);
 addBox(scene, mats.trim, [-8.67, 0.04, 0], [0.08, 0.12, 13.5]);
 
-function makeDesk(x, z, color, name, idle = false) {
-  const group = new THREE.Group();
-  group.position.set(x, 0, z);
-  scene.add(group);
-  addBox(group, mats.desk, [0, 0.92, 0], [1.9, 0.14, 1.05]);
-  for (const dx of [-0.78, 0.78]) for (const dz of [-0.38, 0.38]) addBox(group, mats.dark, [dx, 0.46, dz], [0.09, 0.92, 0.09]);
-  addBox(group, mats.dark, [0, 1.13, -0.3], [0.72, 0.5, 0.08]);
-  addBox(group, mats.screen, [0, 1.13, -0.245], [0.59, 0.37, 0.025]);
-  addBox(group, mats.dark, [0, 0.99, 0.2], [0.4, 0.025, 0.28]);
+function makeDesk(x, z, name) {
+  const desk = new THREE.Group();
+  desk.position.set(x, 0, z);
+  scene.add(desk);
+  addBox(desk, mats.desk, [0, 0.92, 0], [1.9, 0.14, 1.05]);
+  for (const dx of [-0.78, 0.78]) for (const dz of [-0.38, 0.38]) addBox(desk, mats.dark, [dx, 0.46, dz], [0.09, 0.92, 0.09]);
+  addBox(desk, mats.dark, [0, 1.13, -0.3], [0.72, 0.5, 0.08]);
+  addBox(desk, mats.screen, [0, 1.13, -0.245], [0.59, 0.37, 0.025]);
+  addBox(desk, mats.dark, [0, 0.99, 0.2], [0.4, 0.025, 0.28]);
   const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.16, 6), mats.green);
   lamp.position.set(0.6, 1.18, -0.35);
   lamp.material.emissive.setHex(0x8a9e4a);
-  group.add(lamp);
+  desk.add(lamp);
   const chair = new THREE.Group();
   chair.position.set(0, 0, 0.95);
-  group.add(chair);
+  desk.add(chair);
   addBox(chair, mats.dark, [0, 0.58, 0], [0.7, 0.12, 0.62]);
   addBox(chair, mats.dark, [0, 0.93, 0.28], [0.7, 0.62, 0.12]);
   addBox(chair, mats.dark, [0, 0.28, 0], [0.08, 0.5, 0.08]);
-  const person = new THREE.Group();
-  person.position.set(0, 1.06, 0.7);
-  group.add(person);
-  const shirt = new THREE.MeshLambertMaterial({ color });
-  addBox(person, shirt, [0, 0.12, 0.14], [0.48, 0.42, 0.3]);
-  const head = new THREE.Mesh(sphereGeo, mats.skin);
-  head.position.set(0, 0.55, -0.05);
-  person.add(head);
-  const armL = addBox(person, shirt, [-0.29, 0.02, 0.2], [0.13, 0.36, 0.13]);
-  const armR = addBox(person, shirt, [0.29, 0.02, 0.2], [0.13, 0.36, 0.13]);
-  const pants = new THREE.MeshLambertMaterial({ color: 0x5d6572 });
-  const makeLeg = (x) => {
-    const hip = new THREE.Group();
-    hip.position.set(x, -0.18, 0.12);
-    person.add(hip);
-    const thigh = addBox(hip, pants, [0, -0.12, 0], [0.15, 0.24, 0.18]);
-    const knee = new THREE.Group();
-    knee.position.set(0, -0.24, 0);
-    hip.add(knee);
-    const shin = addBox(knee, pants, [0, -0.12, 0], [0.14, 0.24, 0.16]);
-    const foot = addBox(knee, mats.dark, [0, -0.25, -0.12], [0.14, 0.07, 0.24]);
-    return { hip, knee, thigh, shin, foot };
-  };
-  const legL = makeLeg(-0.11);
-  const legR = makeLeg(0.11);
-  const frame = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(0.95, 0.95, 0.66)), new THREE.LineBasicMaterial({ color: 0xffffff }));
-  frame.position.set(0, 0.37, 0.08);
-  frame.visible = false;
-  person.add(frame);
-  person.userData = { name, role: name === 'Joko' ? 'Ketua Tim' : 'Anggota Tim', agentData: null };
-  for (const child of person.children) child.userData = person.userData;
-  return { group: person, desk: group, hitMeshes: [head, person.children[0], armL, armR, legL.thigh, legL.shin, legL.foot, legR.thigh, legR.shin, legR.foot], head, armL, armR, legL, legR, name, idle, phase: Math.random() * 6.28, frame };
+  return desk;
 }
 
-const workers = [
-  makeDesk(-6.4, -4.8, 0xc8f169, 'Joko'),
-  makeDesk(-3.9, -5.7, 0x91a7dd, 'Budi'),
-  makeDesk(-1.7, -5.7, 0xe99b82, 'Sari'),
-  makeDesk(-3.9, -3.4, 0xb5a0dd, 'Agus'),
-  makeDesk(-1.7, -3.4, 0x83b9ad, 'Rina')
-];
-workers[0].desk.rotation.y = -Math.PI / 2;
-for (const worker of workers) {
-  worker.desk.updateMatrixWorld(true);
-  const worldPosition = worker.group.getWorldPosition(new THREE.Vector3());
-  const worldQuaternion = worker.group.getWorldQuaternion(new THREE.Quaternion());
-  scene.attach(worker.group);
-  worker.homePosition = worldPosition;
-  worker.homeQuaternion = worldQuaternion;
-  worker.targetPosition = worldPosition.clone();
-  worker.walking = false;
-  worker.pauseUntil = 0;
-  worker.watchingTv = false;
-  worker.roamTarget = null;
-  worker.nextWander = performance.now() + 400 + Math.random() * 800;
+const workers = [];
+
+async function initWorkers() {
+  const specs = [
+    { x: -6.4, z: -4.8, model: 'character-male-a.glb', name: 'Joko' },
+    { x: -3.9, z: -5.7, model: 'character-male-b.glb', name: 'Budi' },
+    { x: -1.7, z: -5.7, model: 'character-female-a.glb', name: 'Sari' },
+    { x: -3.9, z: -3.4, model: 'character-male-c.glb', name: 'Agus' },
+    { x: -1.7, z: -3.4, model: 'character-female-b.glb', name: 'Rina' }
+  ];
+  
+  for (const spec of specs) {
+    const desk = makeDesk(spec.x, spec.z, spec.name);
+    const worker = await loadCharacter(spec.model, spec.x, spec.z, spec.name);
+    worker.desk = desk;
+    if (spec.name === 'Joko') {
+      desk.rotation.y = -Math.PI / 2;
+      worker.group.position.set(spec.x, 0, spec.z + 0.7);
+      worker.group.rotation.y = -Math.PI / 2;
+    } else {
+      worker.group.position.set(spec.x, 0, spec.z + 0.7);
+      worker.group.rotation.y = Math.PI;
+    }
+    desk.updateMatrixWorld(true);
+    worker.group.updateMatrixWorld(true);
+    worker.homePosition = worker.group.position.clone();
+    worker.homeQuaternion = worker.group.quaternion.clone();
+    worker.targetPosition = worker.homePosition.clone();
+    worker.walking = false;
+    worker.pauseUntil = 0;
+    worker.watchingTv = false;
+    worker.seatedOnSofa = false;
+    worker.roamTarget = null;
+    worker.nextWander = performance.now() + 400 + Math.random() * 800;
+    worker.route = [];
+    worker.routeIndex = 0;
+    worker.walkPhase = 0;
+    workers.push(worker);
+  }
 }
+
+const workersReady = initWorkers();
 
 const gltfLoader = new GLTFLoader();
+const mixers = [];
+const clock = new THREE.Clock();
+
+async function loadCharacter(file, deskX, deskZ, name) {
+  const gltf = await gltfLoader.loadAsync(`assets/kenney/characters/glb/${file}`);
+  const model = gltf.scene;
+  model.scale.setScalar(1.8);
+  
+  const mixer = new THREE.AnimationMixer(model);
+  const animations = {};
+  for (const clip of gltf.animations) {
+    animations[clip.name] = mixer.clipAction(clip);
+  }
+  
+  animations.idle?.play();
+  mixers.push(mixer);
+  
+  const group = new THREE.Group();
+  group.add(model);
+  scene.add(group);
+  
+  const helper = new THREE.BoxHelper(group, 0xffffff);
+  helper.visible = false;
+  scene.add(helper);
+  
+  group.userData = { name, role: name === 'Joko' ? 'Ketua Tim' : 'Anggota Tim', agentData: null };
+  
+  return { group, model, mixer, animations, helper, name, idle: false, phase: Math.random() * 6.28 };
+}
+
 const addModel = (file, scale, position, rotY = 0) => gltfLoader.loadAsync(`assets/kenney/${file}`).then(({ scene: model }) => {
   model.scale.setScalar(scale);
   model.position.set(...position);
@@ -231,20 +250,19 @@ host.addEventListener('mousemove', (event) => {
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
-  const allObjects = workers.flatMap(w => w.hitMeshes);
-  const intersects = raycaster.intersectObjects(allObjects, false);
+  const allObjects = workers.map(w => w.model);
+  const intersects = raycaster.intersectObjects(allObjects, true);
   let newHovered = null;
   if (intersects.length > 0) {
-    const obj = intersects[0].object;
-    let parent = obj;
+    let parent = intersects[0].object;
     while (parent && !parent.userData.name) parent = parent.parent;
     if (parent && parent.userData.name) {
       newHovered = workers.find(w => w.name === parent.userData.name);
     }
   }
   if (newHovered !== hoveredWorker) {
-    if (hoveredWorker) hoveredWorker.frame.visible = false;
-    if (newHovered) newHovered.frame.visible = true;
+    if (hoveredWorker) hoveredWorker.helper.visible = false;
+    if (newHovered) newHovered.helper.visible = true;
     hoveredWorker = newHovered;
   }
 });
@@ -254,11 +272,10 @@ host.addEventListener('click', (event) => {
   pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
   pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
   raycaster.setFromCamera(pointer, camera);
-  const allObjects = workers.flatMap(w => w.hitMeshes);
-  const intersects = raycaster.intersectObjects(allObjects, false);
+  const allObjects = workers.map(w => w.model);
+  const intersects = raycaster.intersectObjects(allObjects, true);
   if (intersects.length > 0) {
-    const obj = intersects[0].object;
-    let parent = obj;
+    let parent = intersects[0].object;
     while (parent && !parent.userData.name) parent = parent.parent;
     if (parent && parent.userData.name) {
       const worker = workers.find(w => w.name === parent.userData.name);
@@ -293,6 +310,7 @@ function renderSubagents(agents) {
 }
 
 async function updateActivity() {
+  await workersReady;
   try {
     const status = await fetch('/api/activity', { cache: 'no-store' }).then(response => response.json());
     connection.textContent = status.connected ? 'ANTIGRAVITY TERHUBUNG' : 'SESSION TIDAK DITEMUKAN';
@@ -309,9 +327,12 @@ async function updateActivity() {
         workers[i].watchingTv = false;
         workers[i].seatedOnSofa = false;
         workers[i].walking = false;
-        poseLegs(workers[i], 'stand', 0);
-        workers[i].group.position.copy(workers[i].homePosition);
-        workers[i].group.quaternion.copy(workers[i].homeQuaternion);
+        const w = workers[i];
+        w.animations.walk?.stop();
+        w.animations.sit?.stop();
+        w.animations.idle?.play();
+        w.group.position.copy(w.homePosition);
+        w.group.quaternion.copy(w.homeQuaternion);
       }
       workers[i].group.userData.agentData = agents[i - 1] || null;
     }
@@ -328,19 +349,30 @@ async function updateActivity() {
     connection.textContent = 'SERVER BELUM JALAN';
   }
 }
-updateClock();
-updateActivity();
-setInterval(updateClock, 30000);
-setInterval(updateActivity, 5000);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const start = performance.now();
-const STAND_HEIGHT = 0.72;
 const ROAM = { minX: -7.6, maxX: 7.2, minZ: -5.6, maxZ: 6.2 };
-const obstacles = workers.map(worker => {
-  const center = worker.desk.getWorldPosition(new THREE.Vector3());
-  const rotated = Math.abs(worker.desk.rotation.y) > 0.1;
-  return { x: center.x, z: center.z, hx: rotated ? 0.53 : 0.95, hz: rotated ? 0.95 : 0.53 };
+
+workersReady.then(() => {
+  updateClock();
+  updateActivity();
+  setInterval(updateClock, 30000);
+  setInterval(updateActivity, 5000);
+  requestAnimationFrame(render);
 });
+const deskPositions = [
+  { x: -6.4, z: -4.8, rotated: true },
+  { x: -3.9, z: -5.7, rotated: false },
+  { x: -1.7, z: -5.7, rotated: false },
+  { x: -3.9, z: -3.4, rotated: false },
+  { x: -1.7, z: -3.4, rotated: false }
+];
+const obstacles = deskPositions.map(d => ({
+  x: d.x,
+  z: d.z,
+  hx: d.rotated ? 0.53 : 0.95,
+  hz: d.rotated ? 0.95 : 0.53
+}));
 obstacles.push(
   { x: -8.4, z: 1.5, hx: 0.1, hz: 1.4 },
   { x: 6.8, z: -6.3, hx: 0.5, hz: 0.37 },
@@ -425,9 +457,10 @@ function startTvTurn(now) {
       worker.walking = false;
       worker.group.position.x = 6.7;
       worker.group.position.z = worker.seatTarget?.z ?? 4.9;
-      worker.group.position.y = STAND_HEIGHT;
+      worker.group.position.y = 0;
       worker.group.rotation.y = -Math.PI / 2;
-      poseLegs(worker, 'stand', 0);
+      worker.animations.sit?.stop();
+      worker.animations.idle?.play();
       worker.nextWander = now + 1200;
     }
   }
@@ -457,22 +490,13 @@ function pickRoamTarget(worker, now) {
   worker.walking = false;
   worker.nextWander = now + 1200;
 }
-function poseLegs(worker, mode, stride) {
-  if (mode === 'sit') {
-    worker.legL.hip.rotation.x = Math.PI / 2;
-    worker.legR.hip.rotation.x = Math.PI / 2;
-    worker.legL.knee.rotation.x = -Math.PI / 2;
-    worker.legR.knee.rotation.x = -Math.PI / 2;
-    return;
-  }
-  const swing = mode === 'walk' ? stride * 0.45 : 0;
-  worker.legL.hip.rotation.x = -swing;
-  worker.legR.hip.rotation.x = swing;
-  worker.legL.knee.rotation.x = mode === 'walk' ? -Math.max(stride, 0) * 0.55 : 0;
-  worker.legR.knee.rotation.x = mode === 'walk' ? -Math.max(-stride, 0) * 0.55 : 0;
-}
 function render(now) {
+workersReady.then(() => {
   requestAnimationFrame(render);
+});
+  const dt = clock.getDelta();
+  for (const mixer of mixers) mixer.update(dt);
+  
   const t = (now - start) * 0.001;
   if (now >= tvTurn.until) startTvTurn(now);
   for (const worker of workers) {
@@ -485,21 +509,18 @@ function render(now) {
             worker.group.rotation.y = -Math.PI / 2;
             worker.tvPhase = 'sitting-down';
             worker.sitStartTime = now;
+            worker.animations.idle?.stop();
+            worker.animations.walk?.stop();
+            worker.animations.sit?.reset().play();
           }
         } else if (worker.tvPhase === 'sitting-down') {
           const duration = 900;
           const p = Math.min((now - worker.sitStartTime) / duration, 1.0);
           const ease = p * p * (3 - 2 * p);
-          worker.group.position.x = THREE.MathUtils.lerp(6.7, worker.seatTarget.x, ease);
+          worker.group.position.x = THREE.MathUtils.lerp(6.7, worker.seatTarget.x + 0.6, ease);
           worker.group.position.z = worker.seatTarget.z;
-          worker.group.position.y = THREE.MathUtils.lerp(STAND_HEIGHT, 0.76, ease);
+          worker.group.position.y = THREE.MathUtils.lerp(0, 0.1, ease);
           worker.group.rotation.y = -Math.PI / 2;
-          worker.legL.hip.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 2, ease);
-          worker.legR.hip.rotation.x = THREE.MathUtils.lerp(0, Math.PI / 2, ease);
-          worker.legL.knee.rotation.x = THREE.MathUtils.lerp(0, -Math.PI / 2, ease);
-          worker.legR.knee.rotation.x = THREE.MathUtils.lerp(0, -Math.PI / 2, ease);
-          worker.armL.rotation.x = THREE.MathUtils.lerp(0, -0.15, ease);
-          worker.armR.rotation.x = THREE.MathUtils.lerp(0, -0.15, ease);
           if (p >= 1.0) {
             worker.tvPhase = 'seated';
             worker.seatedOnSofa = true;
@@ -514,29 +535,21 @@ function render(now) {
       }
 
       if (worker.watchingTv && worker.seatedOnSofa) {
-        worker.group.position.set(worker.seatTarget.x, 0.76, worker.seatTarget.z);
+        worker.group.position.set(worker.seatTarget.x + 0.6, 0.1, worker.seatTarget.z);
         worker.group.rotation.y = -Math.PI / 2;
-        worker.head.position.y = 0.55 + Math.sin(t * 0.5 + worker.phase) * 0.012;
-        worker.armL.rotation.x = -0.15;
-        worker.armR.rotation.x = -0.15;
-        poseLegs(worker, 'sit', 0);
       } else if (worker.tvPhase !== 'sitting-down') {
-        const stride = Math.sin(worker.walkPhase || 0);
-        const walking = worker.walking;
-        worker.group.position.y = STAND_HEIGHT + (walking ? Math.abs(stride) * 0.035 : 0);
-        const sway = walking ? 0 : Math.sin(t * 0.5 + worker.phase) * 0.04;
-        worker.head.position.y = 0.55 + sway;
-        worker.armL.rotation.x = walking ? stride * 0.45 : Math.sin(t * 0.6 + worker.phase) * 0.3;
-        worker.armR.rotation.x = walking ? -stride * 0.45 : Math.cos(t * 0.6 + worker.phase) * 0.3;
-        poseLegs(worker, walking ? 'walk' : 'stand', stride);
+        if (worker.walking) {
+          worker.animations.walk?.play();
+          worker.animations.idle?.stop();
+        } else {
+          worker.animations.idle?.play();
+          worker.animations.walk?.stop();
+        }
       }
     } else {
-      worker.group.position.y = 0;
-      const type = Math.sin(t * 3.5 + worker.phase) * 0.08;
-      worker.head.position.y = 0.55 + type;
-      worker.armL.rotation.x = Math.sin(t * 4.2 + worker.phase) * 0.6;
-      worker.armR.rotation.x = Math.sin(t * 4.2 + worker.phase + 1.5) * 0.6;
-      poseLegs(worker, 'sit', 0);
+      worker.animations.idle?.play();
+      worker.animations.walk?.stop();
+      worker.animations.sit?.stop();
     }
   }
   controls.update();
