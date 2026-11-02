@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131a">
+  <title>Kantor 3D</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+  </script>
+  <script type="module" src="office.js"></script>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon">K</span><div><strong>Kantor Agent</strong><small>ruang kerja digital</small></div></div>
+      <div class="live"><i></i><span id="connection">MEMERIKSA SESSION</span></div>
+      <button id="focus" class="icon-button" aria-label="Fokuskan tampilan" title="Fokuskan tampilan">⌖</button>
+    </header>
+    <section class="workspace">
+      <div id="scene" class="scene" aria-label="Kantor virtual 3D"></div>
+      <div class="scene-heading"><span>RUANG KERJA</span><h1>Semua sedang bekerja.</h1><p>Gerakkan mouse untuk memutar tampilan</p></div>
+      <div class="scene-footer"><span><i class="legend-dot working"></i> Bekerja</span><span><i class="legend-dot idle"></i> Istirahat</span><span class="fps">LOW GRAPHICS</span></div>
+      <aside class="activity-card"><div class="card-title"><span>AKTIVITAS TERKINI</span><b id="model-badge">● DEMO</b></div><div class="activity-row"><span class="avatar">J</span><div><strong>Joko</strong><small id="activity">Menunggu aktivitas agent</small></div><time id="clock">--:--</time></div><div class="card-divider"></div><div id="subagent-list"></div><div class="team-count"><span>ANGGOTA TIM</span><strong id="team-active">04 <small>/ 04</small></strong></div><div class="team-dots"><span>B</span><span>S</span><span>A</span><span>R</span></div></aside>
+      <div id="agent-popup" class="agent-popup" hidden>
+        <button class="popup-close" id="popup-close">×</button>
+        <div class="popup-avatar-row">
+          <span class="popup-avatar" id="popup-avatar">J</span>
+          <div>
+            <strong id="popup-name">Joko</strong>
+            <small id="popup-role">Ketua Tim</small>
+          </div>
+        </div>
+        <div class="popup-divider"></div>
+        <div class="popup-field"><label>Status</label><span id="popup-status">Istirahat</span></div>
+        <div class="popup-field"><label>Tugas</label><span id="popup-task">—</span></div>
+        <div class="popup-field"><label>Provider</label><span id="popup-model">Antigravity</span></div>
+        <div class="popup-field"><label>Tipe Agent</label><span id="popup-type">Main Session</span></div>
+      </div>
+      <div class="hint">DRAG UNTUK MEMUTAR <span>·</span> SCROLL UNTUK ZOOM</div>
+    </section>
+  </main>
+</body>
+</html>
